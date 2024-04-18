@@ -1,24 +1,27 @@
-# Using official python runtime base image
-FROM python:3.9-slim
+FROM node:18-slim
 
 # add curl for healthcheck
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     curl \
+    tini \
     && rm -rf /var/lib/apt/lists/*
 
-# Set the application directory
 WORKDIR /app
 
-# Install our requirements.txt
-COPY ./vote/requirements.txt /app/requirements.txt
-RUN pip install -r requirements.txt
+# have nodemon available for local dev use (file watching)
+RUN npm install -g nodemon
 
-# Copy our code from the current folder to /app inside the container
+COPY ./result/package*.json ./
+
+RUN npm ci \
+ && npm cache clean --force \
+ && mv /app/node_modules /node_modules
+
 COPY . .
 
-# Make port 80 available for links and/or publish
+ENV PORT 80
 EXPOSE 80
 
-# Define our command to be run when launching the container
-CMD ["gunicorn", "app:app", "-b", "0.0.0.0:80", "--log-file", "-", "--access-logfile", "-", "--workers", "4", "--keep-alive", "0"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["node", "server.js"]
