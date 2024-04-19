@@ -2,8 +2,8 @@ pipeline {
   agent any
   stages {
     stage('Docker Build') {
-      agent {
-        dockerfile true
+      steps {
+        sh 'docker build -t $BRANCH_NAME .'
       }
     }
   }
