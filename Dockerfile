@@ -12,7 +12,7 @@ WORKDIR /app
 # have nodemon available for local dev use (file watching)
 RUN npm install -g nodemon
 
-COPY ./result/package*.json ./
+COPY ./package*.json ./
 
 RUN npm ci \
  && npm cache clean --force \
